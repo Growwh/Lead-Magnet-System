@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <code>Paste a link &rarr; Get a playbook</code>
+  <code>Paste a link &rarr; Get your repurposed content</code>
 </p>
 
 ---
@@ -25,8 +25,27 @@
 
 ---
 
+## Before You Start
+
+The system works out of the box, but it works **significantly better** with two things set up:
+
+### 1. Brand Bible (Visual Design System)
+**File:** `brand/brand-context.md`
+
+This is your complete visual identity: colors, fonts, shadows, components, spacing, do's and don'ts. When this file is filled out, every output (PDFs, HTML slide decks, infographics) automatically matches your exact visual brand. Without it, the system uses generic defaults.
+
+### 2. Voice Context (How You Write)
+**File:** `brand/voice-context.md`
+
+This is your personality on paper: how you talk, your speech patterns, banned words, writing rules, voice examples, content structure. When this file is filled out, every piece of content sounds like **you** actually wrote it. Without it, the system writes in a generic professional tone.
+
+> Both files are optional. The system runs without them. But the difference in output quality is night and day.
+
+---
+
 ## Table of Contents
 
+- [Before You Start](#before-you-start)
 - [What It Generates](#-what-it-generates)
 - [How It Works](#-how-it-works)
 - [Architecture](#-architecture)
