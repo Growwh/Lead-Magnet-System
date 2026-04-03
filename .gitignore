@@ -1,0 +1,32 @@
+# Environment (NEVER commit secrets)
+.env
+.env.local
+
+# Output (generated files)
+output/*
+!output/.gitkeep
+
+# Cache
+output/.cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+*.bak

@@ -1,0 +1,28 @@
+# Lead Magnet System In A Box (v1) - Python Dependencies
+# Install: pip install -r requirements.txt
+# Then: python -m playwright install chromium
+
+# Core
+anthropic>=0.40.0          # Claude API SDK (writing pipeline)
+python-dotenv>=1.0.0       # .env file loading
+pyyaml>=6.0                # config.yaml parsing
+requests>=2.31.0           # HTTP fetching
+
+# Content Fetching
+beautifulsoup4>=4.12.0     # HTML parsing for web URLs
+pdfplumber>=0.10.0         # PDF text extraction
+PyMuPDF>=1.23.0            # PDF image extraction + post-processing
+
+# PDF Generation
+playwright>=1.40.0         # Chromium browser control (HTML > screenshot)
+Pillow>=10.0.0             # Image processing (screenshot > PDF)
+
+# Document Generation
+python-docx>=1.0.0         # Word document generation
+Markdown>=3.5.0            # Markdown parsing
+
+# Notion Publishing (optional)
+notion-client>=2.2.0       # Official Notion API
+
+# Image Generation (optional, requires paid Gemini API)
+google-genai>=1.0.0        # Google Gemini API

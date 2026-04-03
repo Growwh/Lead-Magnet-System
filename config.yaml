@@ -1,0 +1,186 @@
+# ============================================================================
+# Lead Magnet System In A Box (v1) - Central Configuration
+# ============================================================================
+# This is the SINGLE SOURCE OF TRUTH for all brand, voice, and system settings.
+# Every script, template, and prompt reads from this file.
+# Change one file, rebrand everything.
+# ============================================================================
+
+# --- Brand Identity ---
+brand:
+  name: "Your Brand"
+  full_name: "Your Full Name"
+  tagline: "Your tagline here"
+  domain: ""
+  email: ""
+
+  description: >
+    Describe what you do and who you serve. This gets injected into
+    lead magnet CTAs and framing.
+
+  icp:
+    description: >
+      Describe your ideal customer profile. Industry, company size,
+      roles, pain points.
+    company_size: ""
+    roles: []
+    pain_points: []
+
+  cta:
+    primary_action: "Book a call"
+    primary_url: ""  # Add your Calendly/Cal.com link
+    platform: "Calendly"
+    secondary_action: "reach out"
+    secondary_text: "you know where to find me"
+
+# --- Logo ---
+logo:
+  has_logo: false
+  # file: "assets/logo.png"
+
+# --- Color Palette ---
+# Replace these with your brand colors
+colors:
+  core:
+    background:
+      hex: "#FBFEF9"
+      role: "Light mode background"
+    text:
+      hex: "#191923"
+      role: "Dark mode background. Primary text."
+    accent:
+      hex: "#0E79B2"
+      role: "Primary accent. CTAs, highlights."
+
+  secondary:
+    success:
+      hex: "#2D9F5D"
+      role: "Success, positive confirmations"
+    error:
+      hex: "#D64045"
+      role: "Error, destructive actions ONLY"
+    active:
+      hex: "#17BEBB"
+      role: "Active/live states"
+    category:
+      hex: "#6C63AC"
+      role: "Tags, categories"
+
+# --- Typography ---
+typography:
+  fonts:
+    display:
+      family: "Montserrat"
+      weights: [700, 800, 900]
+      purpose: "Headlines ONLY."
+    editorial:
+      family: "Cormorant Garamond"
+      weights: ["italic 400", "italic 500"]
+      purpose: "Editorial accents, subtitles."
+    body:
+      family: "Inter"
+      weights: [300, 400, 500, 600]
+      purpose: "Body text, navigation, descriptions."
+    mono:
+      family: "JetBrains Mono"
+      weights: [400, 500]
+      purpose: "Labels, tags, code, timestamps."
+
+# --- Visual Style ---
+visual_style:
+  system: "Cool Neumorphism"
+  description: >
+    Soft UI. Element color matches background.
+    Depth from opposing light and shadow only.
+
+# --- Voice & Tone ---
+voice:
+  personality: "Describe your voice here"
+  tone: "Describe your tone"
+  perspective: "First person / third person"
+  # For full voice context, see brand/voice-context.md
+
+# --- Content Rules ---
+content:
+  banned_words:
+    - "delve"
+    - "landscape"
+    - "it's worth noting"
+    - "However"
+    - "Moreover"
+    - "Furthermore"
+    - "In conclusion"
+    - "cutting-edge"
+    - "innovative"
+    - "leverage"
+    - "synergies"
+    - "game-changer"
+    - "transformative"
+    - "seamlessly"
+    - "unlock"
+    - "revolutionize"
+
+  banned_patterns:
+    - "em dashes (never use them)"
+    - "Triple-adjective combos"
+    - "Definition-first openings"
+    - "Hollow motivational closings"
+
+# --- Output Configuration ---
+output:
+  directory: "output"
+  filename_pattern: "{slug}-branded"
+  formats:
+    markdown: true
+    pdf: true
+    docx: true
+    notion: false
+    html: true
+
+  notion:
+    enabled: false
+    # NOTION_API_KEY and NOTION_PARENT_PAGE_ID loaded from .env
+
+# --- Input Configuration ---
+input:
+  platforms:
+    linkedin:
+      detection: ["linkedin.com/posts/", "linkedin.com/pulse/"]
+      fetch_method: "scrape_with_fallback"
+    youtube:
+      detection: ["youtube.com/watch", "youtu.be/"]
+      fetch_method: "transcript_api"
+    notion:
+      detection: ["notion.so", "notion.site"]
+      fetch_method: "notion_api"
+    google_docs:
+      detection: ["docs.google.com/document"]
+      fetch_method: "export_url"
+
+  content_mode: "rewrite_from_core"
+  low_density_action: "ask_clarifying_questions"
+
+# --- Lead Magnet Types ---
+lead_magnet_types:
+  infographic:
+    page_count: 1
+    structure: "single visual with key data points"
+  playbook:
+    page_count: "dynamic"
+    structure: "problem > system > receipts > steps > proof > FAQ > CTA"
+
+# --- Pipeline Configuration ---
+pipeline:
+  writing_mode: "critique_loop"
+  max_critique_rounds: 1
+  validation_script: true
+  infographic_count: 0  # Set to 2-3 when image generation API is configured
+
+  frameworks: []
+  # Add your proprietary frameworks here
+
+# --- API Keys (loaded from .env) ---
+# ANTHROPIC_API_KEY
+# GEMINI_API_KEY
+# NOTION_API_KEY
+# NOTION_PARENT_PAGE_ID
