@@ -1,70 +1,104 @@
 """
 Lead Magnet System In A Box - CLI Entry Point
 
+Runs the full pipeline and prints results. Can be called directly,
+piped into other tools, or invoked via subprocess from any language.
+
 Usage:
     python agent_runner.py "https://example.com/article"
-    python agent_runner.py "path/to/file.pdf"
+    python agent_runner.py "/path/to/document.pdf"
+    python agent_runner.py "paste your content here..."
+
+    # JSON-only output (no streaming text, for piping):
     python agent_runner.py --json "https://example.com/article"
 
-The --json flag outputs structured JSON with file paths instead of text.
+Exit codes:
+    0  Success
+    1  Runtime error
+    2  Missing environment variables
 """
-import argparse
-import asyncio
-import json
 import sys
+import json
+import asyncio
+import argparse
+from pathlib import Path
 
-try:
-    from agent.agent import LeadMagnetAgent
-except ImportError:
-    sys.exit(
-        "Agent module not found. Make sure agent/__init__.py and agent/agent.py exist.\n"
-        "Run: pip install -r requirements.txt"
-    )
+sys.path.insert(0, str(Path(__file__).parent))
+
+from agent import LeadMagnetAgent
 
 
-async def main():
+def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate a branded lead magnet from any content source."
+        description="Lead Magnet System In A Box - Generate branded lead magnets from any content source.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "input",
-        help="URL, file path, or text content to transform into a lead magnet",
+        nargs="?",
+        help="URL, file path, or pasted content",
     )
     parser.add_argument(
         "--json",
         action="store_true",
-        help="Output structured JSON with file paths instead of text",
+        dest="json_only",
+        help="Output only the JSON result (suppresses streaming text)",
+    )
+    parser.add_argument(
+        "--project-root",
+        default=None,
+        help="Path to the project root (default: directory of this script)",
     )
     parser.add_argument(
         "--no-notion",
         action="store_true",
-        help="Skip Notion push even if configured",
+        dest="no_notion",
+        help="Skip pushing the result to Notion",
     )
+    return parser.parse_args()
 
-    args = parser.parse_args()
 
-    agent = LeadMagnetAgent()
+async def main():
+    args = parse_args()
 
-    async def on_message(text: str):
-        if not args.json:
+    if not args.input:
+        print("Error: provide a URL, file path, or content as the first argument.", file=sys.stderr)
+        print('Usage: python agent_runner.py "https://example.com/article"', file=sys.stderr)
+        sys.exit(1)
+
+    project_root = args.project_root or str(Path(__file__).parent)
+    try:
+        agent = LeadMagnetAgent(project_root=project_root)
+    except (EnvironmentError, FileNotFoundError) as e:
+        print(f"Configuration error:\n{e}", file=sys.stderr)
+        sys.exit(2)
+
+    if not args.json_only:
+        print("Lead Magnet Agent starting...")
+        preview = args.input[:120] + ("..." if len(args.input) > 120 else "")
+        print(f"Input: {preview}")
+        print("-" * 60)
+
+    async def on_message(text: str) -> None:
+        if not args.json_only:
             print(text, end="", flush=True)
 
-    result = await agent.run(
-        args.input,
-        on_message=on_message,
-        push_to_notion=not args.no_notion,
-    )
+    result = await agent.run(args.input, on_message=on_message, push_to_notion=not args.no_notion)
 
-    if args.json:
-        # Remove raw_output from JSON (too large)
-        output = {k: v for k, v in result.items() if k != "raw_output"}
-        print(json.dumps(output, indent=2))
-    else:
-        print("\n\n--- Result ---")
-        for key, value in result.items():
-            if key != "raw_output" and value:
-                print(f"  {key}: {value}")
+    if not args.json_only:
+        print("\n" + "=" * 60)
+        print("OUTPUTS:")
+
+    output = {k: v for k, v in result.items() if k != "raw_output"}
+    print(json.dumps(output, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        print(f"\nError: {e}", file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(1)
