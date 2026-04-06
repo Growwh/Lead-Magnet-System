@@ -46,7 +46,7 @@ TOOL_DEFINITIONS = [
             "Saves the content to output/fetched_raw.txt and returns the file path. "
             "Use read_file to access the content after fetching."
         ),
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "input_source": {
@@ -65,7 +65,7 @@ TOOL_DEFINITIONS = [
             "Follow the brand style guide in .infographic/brand.md. "
             "No logo, no URL, no branding. Output goes into output/."
         ),
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "prompt": {
@@ -91,7 +91,7 @@ TOOL_DEFINITIONS = [
             "Generate a branded PDF from a markdown file using Playwright/Chromium. "
             "subtitle is always passed as empty string."
         ),
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "title": {"type": "string", "description": "Document title shown on the cover page"},
@@ -106,7 +106,7 @@ TOOL_DEFINITIONS = [
     {
         "name": "generate_docx",
         "description": "Generate a branded Word document (.docx) from a markdown file. subtitle is always passed as empty string.",
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "title": {"type": "string", "description": "Document title"},
@@ -125,7 +125,7 @@ TOOL_DEFINITIONS = [
             "Uploads infographic images to Notion's file API and embeds them inline. "
             "Returns the URL of the created Notion page."
         ),
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "title": {"type": "string", "description": "Notion page title"},
@@ -144,7 +144,7 @@ TOOL_DEFINITIONS = [
             "Use on every [Image: URL_OR_PATH] found in fetched content BEFORE auditing. "
             "Also use after each generate_infographic call to quality-check the output."
         ),
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "source": {"type": "string", "description": "Image URL (http/https) or file path"},
@@ -155,7 +155,7 @@ TOOL_DEFINITIONS = [
     {
         "name": "read_file",
         "description": "Read a file from disk and return its text content.",
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "file_path": {"type": "string", "description": "Path relative to the project root"},
@@ -166,7 +166,7 @@ TOOL_DEFINITIONS = [
     {
         "name": "write_file",
         "description": "Write text content to a file on disk. Creates parent directories if needed.",
-        "input_schema": {
+        "parameters": {
             "type": "object",
             "properties": {
                 "file_path": {"type": "string", "description": "Path relative to the project root"},
