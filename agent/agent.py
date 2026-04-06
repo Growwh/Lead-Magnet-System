@@ -101,23 +101,18 @@ class LeadMagnetAgent:
         run_start_time = time.time()
 
         for turn in range(MAX_TURNS + 1):
-            async with self._client.messages.stream(
-                model="claude-sonnet-4-6",
-                max_tokens=64000,
-                thinking={"type": "adaptive"},
-                system=system,
-                tools=TOOL_DEFINITIONS,
-                messages=messages,
-            ) as stream:
-                async for text in stream.text_stream:
-                    collected_text.append(text)
-                    if on_message:
-                        await on_message(text)
-                response = await stream.get_final_message()
-
+            chat = self._client.aio.chats.create(
+                model=self.model_id,
+                config=types.GenerateContentConfig(
+                    system_instruction=system,
+                    tools=GEMINI_TOOL_DEFINITIONS,
+                )
+            )
+            response = await chat.send_message(user_input)
+            
             if response.stop_reason == "end_turn":
                 break
-
+            
             tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
             if not tool_use_blocks:
                 break
