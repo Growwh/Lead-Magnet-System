@@ -333,11 +333,12 @@ class ToolExecutor:
         if not raw:
             return [{"type": "text", "text": f"Empty image data from: {source}"}]
         b64 = base64.standard_b64encode(raw).decode("utf-8")
-        return [
-            {"type": "text", "text": f"Image from: {source}"},
-            {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": b64}},
-        ]
 
+        return [
+            {"text": f"Image from: {source}"},
+            {"inline_data": {"mime_type": media_type, "data": b64}},
+        ]
+    
     def _run_read_file(self, file_path: str) -> str:
         path, err = self._safe_path(file_path)
         if err:
