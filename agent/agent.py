@@ -81,67 +81,70 @@ class LeadMagnetAgent:
         load_and_validate_env(self.project_root)
         self._system_prompt = _AUTONOMOUS_PREAMBLE + build_system_prompt(self.project_root)
         self._executor = ToolExecutor(self.project_root)
-        self._client = anthropic.AsyncAnthropic(timeout=600.0)
         self._client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"), http_options={'timeout': 600})
         self.model_id = "gemma-4-31b-it"
 
     async def run(
         self,
         user_input: str,
-        on_message: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+        brand_context: str | None = None,
+        voice_context: str | None = None,
         push_to_notion: bool = True,
     ) -> dict:
+        # Build dynamic system prompt
+        system = build_system_prompt(
+            self.project_root, 
+            brand_text=brand_context, 
+            voice_text=voice_context
+        )
         system = self._system_prompt
         if not push_to_notion:
             system = "IMPORTANT: Do NOT call push_to_notion. Skip the Notion push step entirely.\n\n" + system
 
-        messages = [{"role": "user", "content": user_input}]
-        collected_text: list[str] = []
-        loop = asyncio.get_running_loop()
         run_start_time = time.time()
-
-        for turn in range(MAX_TURNS + 1):
-            chat = self._client.aio.chats.create(
-                model=self.model_id,
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    tools=GEMINI_TOOL_DEFINITIONS,
-                )
+        collected_text = []
+        
+        # Initialize Gemini Chat with Tools
+        chat = self._client.aio.chats.create(
+            model=self.model_id,
+            config=types.GenerateContentConfig(
+                system_instruction=system,
+                tools=TOOL_DEFINITIONS,
             )
-            response = await chat.send_message(user_input)
-            
-            if response.stop_reason == "end_turn":
-                break
-            
-            tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
-            if not tool_use_blocks:
-                break
+        )
+        # Send initial user message
+        response = await chat.send_message(user_input)
+        
+        for turn in range(MAX_TURNS + 1):
+            # Check if the model wants to call tools
+            # Extract text content for the final result
+            for part in response.candidates[0].content.parts:
+                if part.text:
+                    collected_text.append(part.text)
 
-            if turn == MAX_TURNS:
-                raise RuntimeError(
-                    f"Agent exceeded {MAX_TURNS} tool-call iterations. "
-                    "Pipeline may be stuck in a loop."
-                )
-
-            messages.append({"role": "assistant", "content": response.content})
-
-            results = await asyncio.gather(*[
-                loop.run_in_executor(None, self._executor.execute, b.name, b.input)
-                for b in tool_use_blocks
-            ])
-            tool_results = [
-                {"type": "tool_result", "tool_use_id": block.id, "content": result}
-                for block, result in zip(tool_use_blocks, results)
+            # Identify Function Calls
+            tool_calls = [
+                part.function_call 
+                for part in response.candidates[0].content.parts 
+                if part.function_call
             ]
-            messages.append({"role": "user", "content": tool_results})
 
-            for msg in messages[:-2]:
-                if msg["role"] == "assistant" and isinstance(msg.get("content"), list):
-                    msg["content"] = [
-                        b for b in msg["content"]
-                        if getattr(b, "type", None) != "thinking"
-                    ]
+            if not tool_calls:
+                break
 
+            # Execute tools in parallel where possible
+            tool_responses = []
+            for fc in tool_calls:
+                # The executor handles the script logic
+                result = self._executor.execute(fc.name, fc.args)
+                tool_responses.append(types.Part.from_function_response(
+                    name=fc.name,
+                    response={'result': result}
+                ))
+            
+            # Feed tool results back to the model
+            response = await chat.send_message(tool_responses)
+            
         return self._build_result("".join(collected_text), run_start_time)
 
     def _build_result(self, raw_output: str, run_start_time: float) -> dict:
