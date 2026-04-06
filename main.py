@@ -19,8 +19,8 @@ async def generate_lead_magnet(request: RepurposeRequest):
         result = await agent.run(
             user_input=request.input_source,
             # Pass these to a modified build_system_prompt
-            brand_text=request.brand_context,
-            voice_text=request.voice_context
+            brand_context=request.brand_context,
+            voice_context=request.voice_context
         )
         return result
     except Exception as e:
