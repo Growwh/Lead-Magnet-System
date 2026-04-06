@@ -10,7 +10,8 @@ import time
 from pathlib import Path
 from typing import Callable, Coroutine, Any
 
-import anthropic
+from google import genai
+from google.genai import types
 
 from .config import load_and_validate_env
 from .system_prompt import build_system_prompt
@@ -81,6 +82,8 @@ class LeadMagnetAgent:
         self._system_prompt = _AUTONOMOUS_PREAMBLE + build_system_prompt(self.project_root)
         self._executor = ToolExecutor(self.project_root)
         self._client = anthropic.AsyncAnthropic(timeout=600.0)
+        self._client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"), http_options={'timeout': 600})
+        self.model_id = "gemma-4-31b-it"
 
     async def run(
         self,
