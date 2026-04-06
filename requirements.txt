@@ -27,3 +27,7 @@ notion-client>=2.2.0       # Official Notion API
 
 # Image Generation (optional, requires paid Gemini API)
 google-genai>=1.0.0        # Google Gemini API
+
+# Fastapi
+fastapi
+uvicorn
