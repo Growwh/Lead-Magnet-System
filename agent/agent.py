@@ -1,5 +1,5 @@
 """
-Lead Magnet Agent - core agent using the Anthropic Python SDK directly.
+Lead Magnet Agent - core agent using the Google GenAI SDK.
 
 No dependency on Claude Code CLI. Works in any Python environment that can
 pip-install `anthropic`.
@@ -7,6 +7,7 @@ pip-install `anthropic`.
 import asyncio
 import re
 import time
+import os
 from pathlib import Path
 from typing import Callable, Coroutine, Any
 
@@ -134,12 +135,20 @@ class LeadMagnetAgent:
             # Execute tools in parallel where possible
             tool_responses = []
             for fc in tool_calls:
-                # The executor handles the script logic
                 result = self._executor.execute(fc.name, fc.args)
-                tool_responses.append(types.Part.from_function_response(
-                    name=fc.name,
-                    response={'result': result}
-                ))
+                
+                # Check if the result is already a list of Parts (from analyze_image)
+                if isinstance(result, list):
+                    # For analyze_image, result is already Part objects or dicts
+                    tool_responses.append(types.Part.from_function_response(
+                        name=fc.name,
+                        response={'content': result} 
+                    ))
+                else:
+                    tool_responses.append(types.Part.from_function_response(
+                        name=fc.name,
+                        response={'result': result}
+                    ))
             
             # Feed tool results back to the model
             response = await chat.send_message(tool_responses)
