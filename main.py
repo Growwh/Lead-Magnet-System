@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from agent.agent import LeadMagnetAgent
-import os
+from pathlib import Path
 
 app = FastAPI()
 agent = LeadMagnetAgent()
