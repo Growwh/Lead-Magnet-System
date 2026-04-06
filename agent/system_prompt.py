@@ -5,7 +5,7 @@ The source files remain the single source of truth - nothing is duplicated here.
 from pathlib import Path
 
 
-def build_system_prompt(project_root: Path) -> str:
+def build_system_prompt(project_root: Path, brand_text: str = None, voice_text: str = None) -> str:
     skill_file = project_root / ".claude" / "commands" / "repurpose-lead-magnet.md"
     brand_file = project_root / "brand" / "brand-context.md"
     voice_file = project_root / "brand" / "voice-context.md"
@@ -18,18 +18,16 @@ def build_system_prompt(project_root: Path) -> str:
 
     parts = [skill_file.read_text(encoding="utf-8")]
 
-    if brand_file.exists():
+    # Use the variable if provided, otherwise fallback to the file
+    if brand_text:
+        parts.append(f"\n\n---\n\n## Brand Context\n\n{brand_text}")
+    elif brand_file.exists():
         parts.append("\n\n---\n\n## Brand Context\n\n")
         parts.append(brand_file.read_text(encoding="utf-8"))
-    else:
-        import warnings
-        warnings.warn(
-            f"Brand context file not found: {brand_file}. "
-            "Agent will run without brand guidelines.",
-            stacklevel=2,
-        )
-
-    if voice_file.exists():
+        
+    if voice_text:
+        parts.append(f"\n\n---\n\n## Voice Context\n\n{voice_text}")
+    elif voice_file.exists():
         parts.append("\n\n---\n\n## Voice Context\n\n")
         parts.append(voice_file.read_text(encoding="utf-8"))
 
