@@ -97,7 +97,6 @@ class LeadMagnetAgent:
             brand_text=brand_context, 
             voice_text=voice_context
         )
-        system = self._system_prompt
         if not push_to_notion:
             system = "IMPORTANT: Do NOT call push_to_notion. Skip the Notion push step entirely.\n\n" + system
 
